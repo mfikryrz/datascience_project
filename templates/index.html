@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wine Quality Prediction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header Navigation */
+        .header {
+            background-color: #fff;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #ddd;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav a:hover {
+            background-color: #e9e9e9;
+        }
+
+        .nav a.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .menu-btn {
+            background-color: #e9e9e9;
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .menu-btn:hover {
+            background-color: #d4d4d4;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .main-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .form-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        /* Form Styles */
+        .prediction-form {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            min-width: 180px;
+            margin-right: 15px;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .form-group input::placeholder {
+            color: #999;
+        }
+
+        .form-group input.error {
+            border-color: #ff4444;
+        }
+
+        /* Predict Button */
+        .predict-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .predict-btn:hover {
+            background-color: #45a049;
+        }
+
+        .predict-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error message */
+        .error-message {
+            background-color: #ffe6e6;
+            color: #d00;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* Success message */
+        .success-message {
+            background-color: #e6ffe6;
+            color: #008000;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* Train button */
+        .train-btn {
+            background-color: #ff9800;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        .train-btn:hover {
+            background-color: #e68900;
+        }
+
+        /* Social Media Icons */
+        .social-media {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .social-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        .social-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .linkedin {
+            background-color: #0077b5;
+        }
+
+        .youtube {
+            background-color: #ff0000;
+        }
+
+        .github {
+            background-color: #333;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .main-title {
+                font-size: 36px;
+            }
+
+            .form-title {
+                font-size: 24px;
+            }
+
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .form-group label {
+                min-width: auto;
+                margin-right: 0;
+                margin-bottom: 8px;
+            }
+
+            .form-group input {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+
+        /* Input validation helpers */
+        .input-helper {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        .input-helper.error {
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <a href="{{ url_for('home') }}" class="home-link active">Home</a>
+            <a href="{{ url_for('training') }}" class="train-btn">Train Model</a>
+            <div class="menu-btn">Menu ☰</div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="main-title">Wine Quality Prediction</h1>
+        <p class="subtitle">A Wine Quality Checking Web App</p>
+
+        <h2 class="form-title">Please Fill The Information</h2>
+
+        <!-- Flask Form -->
+        <form class="prediction-form" method="POST" action="{{ url_for('index') }}" id="wineForm">
+            <div class="form-group">
+                <label for="fixed_acidity">Fixed Acidity:</label>
+                <input type="number" id="fixed_acidity" name="fixed_acidity" step="0.01" 
+                       placeholder="Enter fixed acidity (e.g., 7.4)" min="0" max="20" required>
+                <div class="input-helper">Range: 4.6 - 15.9 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="volatile_acidity">Volatile Acidity:</label>
+                <input type="number" id="volatile_acidity" name="volatile_acidity" step="0.01" 
+                       placeholder="Enter volatile acidity (e.g., 0.70)" min="0" max="2" required>
+                <div class="input-helper">Range: 0.12 - 1.58 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="citric_acid">Citric Acid:</label>
+                <input type="number" id="citric_acid" name="citric_acid" step="0.01" 
+                       placeholder="Enter citric acid (e.g., 0.00)" min="0" max="1" required>
+                <div class="input-helper">Range: 0.00 - 1.00 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="residual_sugar">Residual Sugar:</label>
+                <input type="number" id="residual_sugar" name="residual_sugar" step="0.1" 
+                       placeholder="Enter residual sugar (e.g., 1.9)" min="0" max="20" required>
+                <div class="input-helper">Range: 0.9 - 15.5 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="chlorides">Chlorides:</label>
+                <input type="number" id="chlorides" name="chlorides" step="0.001" 
+                       placeholder="Enter chlorides (e.g., 0.076)" min="0" max="1" required>
+                <div class="input-helper">Range: 0.012 - 0.611 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="free_sulfur_dioxide">Free Sulfur Dioxide:</label>
+                <input type="number" id="free_sulfur_dioxide" name="free_sulfur_dioxide" step="1" 
+                       placeholder="Enter free sulfur dioxide (e.g., 11)" min="0" max="100" required>
+                <div class="input-helper">Range: 1 - 72 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="total_sulfur_dioxide">Total Sulfur Dioxide:</label>
+                <input type="number" id="total_sulfur_dioxide" name="total_sulfur_dioxide" step="1" 
+                       placeholder="Enter total sulfur dioxide (e.g., 34)" min="0" max="300" required>
+                <div class="input-helper">Range: 6 - 289 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="density">Density:</label>
+                <input type="number" id="density" name="density" step="0.0001" 
+                       placeholder="Enter density (e.g., 0.9978)" min="0.99" max="1.01" required>
+                <div class="input-helper">Range: 0.9901 - 1.0037 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="pH">pH:</label>
+                <input type="number" id="pH" name="pH" step="0.01" 
+                       placeholder="Enter pH (e.g., 3.51)" min="2.5" max="4.5" required>
+                <div class="input-helper">Range: 2.74 - 4.01 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="sulphates">Sulphates:</label>
+                <input type="number" id="sulphates" name="sulphates" step="0.01" 
+                       placeholder="Enter sulphates (e.g., 0.56)" min="0" max="2" required>
+                <div class="input-helper">Range: 0.33 - 2.00 (typical values)</div>
+            </div>
+
+            <div class="form-group">
+                <label for="alcohol">Alcohol:</label>
+                <input type="number" id="alcohol" name="alcohol" step="0.1" 
+                       placeholder="Enter alcohol content (e.g., 9.4)" min="8" max="15" required>
+                <div class="input-helper">Range: 8.4 - 14.9 (typical values)</div>
+            </div>
+
+            <button type="submit" class="predict-btn" id="predictBtn">
+                Predict Wine Quality
+            </button>
+
+            <!-- Loading animation -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Predicting wine quality...</p>
+            </div>
+
+            <!-- Error message -->
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- Success message -->
+            <div class="success-message" id="successMessage"></div>
+        </form>
+
+        <!-- Social Media Icons -->
+        <div class="social-media">
+            <a href="#" class="social-icon linkedin" title="LinkedIn">
+                in
+            </a>
+            <a href="#" class="social-icon youtube" title="YouTube">
+                ▶
+            </a>
+            <a href="#" class="social-icon github" title="GitHub">
+                🐙
+            </a>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Form submission handler with Flask integration
+        document.getElementById('wineForm').addEventListener('submit', function(e) {
+            // Show loading animation
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('predictBtn').disabled = true;
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            
+            // Validate all inputs before submission
+            const inputs = this.querySelectorAll('input[required]');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if (!input.value || parseFloat(input.value) < parseFloat(input.min) || parseFloat(input.value) > parseFloat(input.max)) {
+                    input.classList.add('error');
+                    isValid = false;
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('predictBtn').disabled = false;
+                document.getElementById('errorMessage').textContent = 'Please fill all fields with valid values within the specified ranges.';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+            
+            // If validation passes, form will submit normally to Flask
+            // The loading animation will be hidden when the page redirects
+        });
+
+        // Real-time validation for inputs
+        const inputs = document.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                const min = parseFloat(this.getAttribute('min'));
+                const max = parseFloat(this.getAttribute('max'));
+                
+                if (this.value && (value < min || value > max)) {
+                    this.classList.add('error');
+                    this.nextElementSibling.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                    this.nextElementSibling.classList.remove('error');
+                }
+            });
+
+            // Auto-format on blur
+            input.addEventListener('blur', function() {
+                if (this.value) {
+                    const step = parseFloat(this.getAttribute('step') || '1');
+                    const decimals = step.toString().split('.')[1]?.length || 0;
+                    this.value = parseFloat(this.value).toFixed(decimals);
+                }
+            });
+        });
+
+        // Sample data button (for testing)
+        function fillSampleData() {
+            document.getElementById('fixed_acidity').value = '7.4';
+            document.getElementById('volatile_acidity').value = '0.70';
+            document.getElementById('citric_acid').value = '0.00';
+            document.getElementById('residual_sugar').value = '1.9';
+            document.getElementById('chlorides').value = '0.076';
+            document.getElementById('free_sulfur_dioxide').value = '11';
+            document.getElementById('total_sulfur_dioxide').value = '34';
+            document.getElementById('density').value = '0.9978';
+            document.getElementById('pH').value = '3.51';
+            document.getElementById('sulphates').value = '0.56';
+            document.getElementById('alcohol').value = '9.4';
+        }
+
+        // Add sample data button for testing (optional)
+        const sampleBtn = document.createElement('button');
+        sampleBtn.type = 'button';
+        sampleBtn.textContent = 'Fill Sample Data';
+        sampleBtn.className = 'train-btn';
+        sampleBtn.style.marginTop = '10px';
+        sampleBtn.style.marginRight = '10px';
+        sampleBtn.onclick = fillSampleData;
+        
+        const predictBtn = document.getElementById('predictBtn');
+        predictBtn.parentNode.insertBefore(sampleBtn, predictBtn);
+
+        // Menu functionality
+        document.querySelector('.menu-btn').addEventListener('click', function() {
+            const menuOptions = [
+                'Home',
+                'Train Model', 
+                'Predict',
+                'About',
+                'Documentation'
+            ];
+            
+            const menu = menuOptions.map(option => `• ${option}`).join('\n');
+            alert(`Menu Options:\n\n${menu}\n\nSelect an option to navigate.`);
+        });
+
+        // Handle form errors from Flask (if any)
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        if (error) {
+            document.getElementById('errorMessage').textContent = decodeURIComponent(error);
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
